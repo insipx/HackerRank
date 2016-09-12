@@ -3,19 +3,45 @@
 #include <string.h>
 
 
-int *closest_block(int posr, int posc, int dimh, int dimw, char board[5][5]);
+int *closest_block(int posr, int posc, int dimh, int dimw, char board[3][3]);
 int *dist(int posr, int posc, int i, int j);
 int man_dist(int posr, int posc, int i, int j);
-
-void next_move(int posr, int posc, char board[5][5]){
-   
-  if(board[posr][posc] == 'd'){
-    printf("CLEAN\n");
-    return;
+void findExit();
+void next_move(int pid, char board[3][3]){
+  //bot will always be at [1][1] 
+  //bot faces directon in which it chooses to make its next move
+  
+  int posr = 1;
+  int posc = 1;
+  
+  int *dist = closest_block(posr, posc, 3, 3, board);
+  if(dist != NULL){
+    findExit(*dist);
+  } 
+  if(board[1][0] != '#'){
+    printf("LEFT\n");
+  }
+  else if (board[1][0] == '#'){
+    printf("DOWN\n");
+  }
+  else if(board[1][0] =='-' && board[0][1] && board[1][2] =='-' && board[2][1] == '-'){
+    printf("LEFT\n");
+  }else if (board[0][1] == '-'){
+    printf("LEFT\n");
+  }else if (board[0][2] == '#' && board[0][1] == '-'){
+    printf("UP\n");
+  }else if(board[0][1] == '#' && board[1][0] == '-'){
+    printf("LEFT\n");
   }
 
-  int *dist = closest_block(posr, posc, 5, 5, board);
 
+    
+
+}
+void findExit(int *dist){
+  int posc = 1;
+  int posr = 1;
+  
   if(*(dist+0) < 0 && *(dist+0) != 0){
     printf("DOWN\n");
     return;
@@ -49,11 +75,10 @@ void next_move(int posr, int posc, char board[5][5]){
     printf("UP\n");
     return; 
   }
-    
-
+ 
 }
 
-int* closest_block(int posr, int posc, int dimh, int dimw, char board[5][5]){
+int* closest_block(int posr, int posc, int dimh, int dimw, char board[3][3]){
   
   int man_dist1 = 9999;
   int a = 9999;
@@ -61,16 +86,16 @@ int* closest_block(int posr, int posc, int dimh, int dimw, char board[5][5]){
 
   for(int i = 0; i < dimh; i++){
     for(int j = 0; j < dimw; j++){
-      if(board[i][j] == 'd'){
+      if(board[i][j] == 'e'){
         a = man_dist(posr, posc, i, j);
         if(a < man_dist1){
           man_dist1 = man_dist(posr, posc, i, j);
           clos = dist(posr, posc, i, j);
         }
-      } 
+      }
     }
   }
-  return clos;
+ return clos;
 }
 int* dist(int posr, int posc, int i, int j){
   static int coord[2];
@@ -87,15 +112,17 @@ int man_dist(int posr, int posc, int i, int j){
 
 }
 
-int main(void) {
-    int pos[2], i;
-    char board[5][5];
-    scanf("%d", &pos[0]);
-    scanf("%d", &pos[1]);
-    for(i=0; i<5; i++) {
-        scanf("%s[^\\n]%*c", board[i]);
-    }
-    next_move(pos[0], pos[1], board);
+
+
+int main() {
+    int pid;
+    char board[3][3];
+    scanf("%d", &pid);
+    for(int i =0; i < 4; i++){
+      scanf("%s[^\\n]%*c", board[i]);
+    }   
+    next_move(pid, board);
+    /* Enter your code here. Read input from STDIN. Print output to STDOUT */    
     return 0;
 }
 
