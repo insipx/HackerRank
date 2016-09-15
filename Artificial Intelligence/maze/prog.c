@@ -1,128 +1,107 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include<stdio.h>
+#include<stdlib.h>
 
-
-int *closest_block(int posr, int posc, int dimh, int dimw, char board[3][3]);
-int *dist(int posr, int posc, int i, int j);
-int man_dist(int posr, int posc, int i, int j);
-void findExit();
-void next_move(int pid, char board[3][3]){
-  //bot will always be at [1][1] 
-  //bot faces directon in which it chooses to make its next move
+#define TRUE 1
+#define FALSE 0
+#define NUM_CELLS 49
+#define ROWS 7
+#define COLS 7
+#define FILE_n "data.dat"
+//need to rework this code for mazefinder
+void next_move(int posx, int posy, int pid, char board[5][5]) 
+{
+  int i, j;
+  char mapped_board[ROWS][COLS];
   
-  int posr = 1;
-  int posc = 1;
-  
-  int *dist = closest_block(posr, posc, 3, 3, board);
-  if(dist != NULL){
-    findExit(*dist);
-  } 
-  if(board[1][0] != '#'){
-    printf("LEFT\n");
+  FILE *fp;
+  fp = fopen(FILE_n, "ab+");
+  fread(mapped_board, sizeof(char), NUM_CELLS, fp);
+  if(feof(fp) != 0){
+    clearerr(fp);
+    fseek(fp, SEEK_SET, 0);
   }
-  else if (board[1][0] == '#'){
-    printf("DOWN\n");
-  }
-  else if(board[1][0] =='-' && board[0][1] && board[1][2] =='-' && board[2][1] == '-'){
-    printf("LEFT\n");
-  }else if (board[0][1] == '-'){
-    printf("LEFT\n");
-  }else if (board[0][2] == '#' && board[0][1] == '-'){
-    printf("UP\n");
-  }else if(board[0][1] == '#' && board[1][0] == '-'){
-    printf("LEFT\n");
-  }
-
-
-    
-
-}
-void findExit(int *dist){
-  int posc = 1;
-  int posr = 1;
-  
-  if(*(dist+0) < 0 && *(dist+0) != 0){
-    printf("DOWN\n");
-    return;
-  }else if( *(dist+0) > 0 && *(dist+0) != 0){
-    printf("UP\n");
-    return;
-  }else if (*(dist+0) ==0){
-    //nothing
-  }
-
-  if(*(dist+1)>0){
-    printf("LEFT\n");
-    return;
-  }else if (*(dist+1)< 0){
-    printf("RIGHT\n");
-    return;
-  }else if (*(dist+1) == 0){
-    //nothing
-  }
-  if(posc < 4){
-    printf("RIGHT\n");
-    return;
-  }else{
-    printf("UP\n"); 
-    return;
-  }
-  if (posr < 4){
-    printf("DOWN\n");
-    return;
-  }else{
-    printf("UP\n");
-    return; 
-  }
- 
-}
-
-int* closest_block(int posr, int posc, int dimh, int dimw, char board[3][3]){
-  
-  int man_dist1 = 9999;
-  int a = 9999;
-  int *clos;
-
-  for(int i = 0; i < dimh; i++){
-    for(int j = 0; j < dimw; j++){
-      if(board[i][j] == 'e'){
-        a = man_dist(posr, posc, i, j);
-        if(a < man_dist1){
-          man_dist1 = man_dist(posr, posc, i, j);
-          clos = dist(posr, posc, i, j);
-        }
-      }
+  if(fp){
+    //use pointers to iterate through board
+    //
+      char *newBoard = board;
+      char *oldBoard = mapped_board;
+    for(i = 0; i<ROWS; i++){
+      if((*newBoard) == 'o' && (*oldBoard) != 'o') 
+        *newBoard = *oldBoard;
+      oldBoard++;
+      newBoard++; 
     }
   }
- return clos;
+  fclose(fp);
+
+  int ansx=-1000,ansy=-1000;
+  int contains_e;
+  
+  
+  //iterate through the board
+  for(i=0;i<5;i++){
+      for(j=0;j<5;j++){        //manhattan distance in one line
+        if(contains_e == TRUE){
+           if(board[i][j] == 'd' && (abs(i-posx)+abs(j-posy))<= (abs(ansx-posx)+abs(ansy-posy)))
+          {
+              ansx = i;
+              ansy = j;
+          }
+        } else {
+            if(mapped_board[i][j] == 'd'  && (abs(i-posx)+abs(j-posy))<= (abs(ansx-posx)+abs(ansy-posy)))
+           { 
+             ansx = i;
+             ansy = j;
+           }
+            else if(mapped_board[i][j] == 'o'&& (abs(i-posx)+abs(j-posy))<= (abs(ansx-posx)+abs(ansy-posy)))
+           { 
+              ansx = i;
+              ansy = j;
+           }
+        }
+      }
+  }
+  
+  if(ansx>posx)
+    printf("DOWN");
+  else if(ansx<posx)
+    printf("UP");
+  else if(ansy>posy)
+    printf("RIGHT");
+  else if(ansy<posy)
+    printf("LEFT");
+  else
+    printf("CLEAN");
+ 
+  fp = fopen("file.txt", "w");
+  fseek(fp, SEEK_SET, 0);
+  fwrite(mapped_board, sizeof(char), NUM_CELLS, fp);
+  fclose(fp);
+
 }
-int* dist(int posr, int posc, int i, int j){
-  static int coord[2];
-  coord[0] = posr-i;
-  coord[1] = posc-j;
-  return coord;
-}
-
-int man_dist(int posr, int posc, int i, int j){
-  int one, two;
-  one = abs(posr-i);
-  two = abs(posc-j);
-  return one + two;
-
-}
-
-
-
-int main() {
-    int pid;
+int *move()
+//characters included:
+//walls -> #
+//empty cells -> -
+//door -> e
+/* Tail starts here */
+int main(void) {
+    int pos[2], i, pid;
     char board[3][3];
     scanf("%d", &pid);
-    for(int i =0; i < 4; i++){
-      scanf("%s[^\\n]%*c", board[i]);
-    }   
-    next_move(pid, board);
-    /* Enter your code here. Read input from STDIN. Print output to STDOUT */    
+ 
+    for(i=0; i<3; i++) {
+        scanf("%s[^\\n]%*c", board[i]);
+    }
+    for(int i = 0; i < 3; i ++)
+      for(int j = 0; j < 3; j++)
+        if(board[i][j] == 'b'){
+          pos[0] = i;
+          pos[1] = j;
+        }
+   
+    next_move(pos[0], pos[1], pid, board);
+
     return 0;
 }
 
