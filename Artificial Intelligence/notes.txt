@@ -1,0 +1,8 @@
+Textbook notes:
+
+2.2.1 Rationality
+  A Rational Agent depends on four things:
+    Performance measure that defines the criterion of success
+    Agent's prior knowledge of the enviroment
+    Actions that the agent can perform
+    The agent's percept sequence to date
