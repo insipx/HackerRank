@@ -5,14 +5,14 @@
 #define TRUE 1
 #define FALSE 0
 #define NUM_CELLS 25
-#define ROWS 5
-#define COLS 5
+#define ROWS 7
+#define COLS 7
 #define FILE_n "data.dat"
 
 int *move(int posx, int posy, char target, char board[ROWS][COLS]);
 
 //need to rework this code for mazefinder
-void next_move(int posx, int posy, char board[ROWS][COLS]) 
+void next_move(int posx, int posy, int pid, char board[ROWS][COLS]) 
 {
   int i, *target_pos, ansx, ansy;
   
@@ -29,23 +29,22 @@ void next_move(int posx, int posy, char board[ROWS][COLS])
 
     //use pointers to iterate through board
     //
-      char *newBoard = board;
-      char *oldBoard = mapped_board;
-    for(i = 0; i<25; i++){
+    char *newBoard = board;
+    char *oldBoard = mapped_board;
+    for(i = 0; i<(ROWS*COLS); i++){
       if((*newBoard) == 'o' && (*oldBoard) != 'o') 
         *newBoard = *oldBoard;
       if( (*newBoard) == 'b')
         *newBoard = '-';
-      //if((*newBoard) == 'd' || (*oldBoard) == 'd') contains_d = TRUE;
       oldBoard++;
       newBoard++; 
     }
   }
   fclose(fp);
 
-  target_pos = move(posx, posy, 'd', board);
+  target_pos = move(posx, posy, 'e', board);
   if(*target_pos == -1000)
-    target_pos = move(posx, posy, 'o', board);
+    target_pos = move(posx, posy, '-', board);
 
   ansx = *target_pos;
   ansy = *(target_pos+1);
@@ -86,17 +85,6 @@ int *move(int posx, int posy, char target, char board[ROWS][COLS] ){
   return target_pos;
 }
 
-int main(void) {
-  int pos[2];
-  char board[5][5];
-  scanf("%d", &pos[0]);
-  scanf("%d", &pos[1]);
-
-  for(int i = 0; i<5;i++)
-    scanf("%s[^\\n]%*c", board[i]);
-  next_move(pos[0],pos[1],board);
-  return 0;
-}
 //characters included:
 //walls -> #
 //empty cells -> -
@@ -104,14 +92,15 @@ int main(void) {
 /* Tail starts here */
 
 //for maze
-/*int main(void) {
+int main(void) {
     int pos[2], i, pid;
-    char board[3][3];
+    char board[ROWS][COLS];
     scanf("%d", &pid);
  
     for(i=0; i<3; i++) {
         scanf("%s[^\\n]%*c", board[i]);
     }
+
     for(int i = 0; i < 3; i ++)
       for(int j = 0; j < 3; j++)
         if(board[i][j] == 'b'){
@@ -122,4 +111,4 @@ int main(void) {
     next_move(pos[0], pos[1], pid, board);
 
     return 0;
-}*/
+}
